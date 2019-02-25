@@ -158,7 +158,7 @@ public class CrudServiceImplTest {
 	@Test(expected = ResourceNotFoundException.class)
 	public void delete() {
 		Long id = userJohn.getId();
-		userService.delete(userJohn);
+		userService.delete(id);
 		userService.findOne(id);
 	}
 

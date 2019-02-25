@@ -12,32 +12,22 @@ import org.springframework.validation.annotation.Validated;
 import com.debaets.crud.core.model.CrudEntity;
 import com.debaets.crud.core.service.CrudService;
 
-public interface CrudFacade <DTO, ID extends Serializable> {
+public interface CrudFacade <DTO, ENTITY, ID extends Serializable> {
 
-	default DTO findOne(@NotNull ID id){
-		return getCrudService().findOne(id);
-	}
+	DTO findOne(@NotNull ID id);
 
-	default DTO create(@NotNull @Validated DTO dto){
-		return getCrudService().create(dto);
-	}
+	List<DTO> findByIds(List<ID> ids);
 
-	default DTO update(@NotNull ID id, @NotNull @Validated DTO dto){
-		return getCrudService().update(id, dto);
-	}
+	DTO create(@NotNull @Validated DTO dto);
 
-	default void delete(@NotNull ID id){
-		getCrudService().deleteById(id);
-	}
+	DTO update(@NotNull ID id, @NotNull @Validated DTO dto);
 
-	default Page<DTO> search(String query, int page, int pageSize){
-		return getCrudService().search(query, new PageRequest(page, pageSize));
-	}
+	void delete(@NotNull ID id);
 
-	default List<DTO> search(@NotNull String searchQuery){
-		return getCrudService().search(searchQuery);
-	}
+	Page<DTO> search(String query, int page, int pageSize);
 
-	CrudService<DTO, ? extends CrudEntity<ID>, ID> getCrudService();
+	List<DTO> search(@NotNull String searchQuery);
+
+	CrudService<ENTITY, ID> getCrudService();
 
 }

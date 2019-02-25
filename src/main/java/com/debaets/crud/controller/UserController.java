@@ -3,6 +3,7 @@ package com.debaets.crud.controller;
 import com.debaets.crud.core.controller.CrudController;
 import com.debaets.crud.core.controller.SearchController;
 import com.debaets.crud.core.facade.CrudFacade;
+import com.debaets.crud.core.model.CrudEntity;
 import com.debaets.crud.facade.UserFacade;
 import com.debaets.crud.model.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class UserController implements CrudController<UserDto, Long>, SearchCont
     private UserFacade userFacade;
 
     @Override
-    public CrudFacade<UserDto, Long> getFacade() {
+    public CrudFacade<UserDto, ? extends CrudEntity<Long>, Long> getFacade() {
         return userFacade;
     }
 }

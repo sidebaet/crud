@@ -11,29 +11,21 @@ import org.springframework.validation.annotation.Validated;
 
 import com.debaets.crud.core.repository.CrudRepository;
 
-public interface CrudService <DTO, ENTITY, ID extends Serializable> {
+public interface CrudService <ENTITY, ID extends Serializable> {
 
-	DTO findOne(ID id);
+	ENTITY findOne(ID id);
 
-	/**
-	 * Aggregate given dto with find ressource based on the aggregator service.
-	 * @param id
-	 * @param dto
-	 * @return
-	 */
-	DTO aggrateById(ID id, DTO dto, AggregateService<DTO, ENTITY> aggregateService);
+	List<ENTITY>  findByIds(List<ID> ids);
 
-	List<DTO>  findByIds(List<ID> ids);
+	ENTITY create(@Validated ENTITY dto);
 
-	DTO create(@Validated DTO dto);
+	ENTITY update(ID id, @Validated ENTITY dto);
 
-	DTO update(ID id, @Validated DTO dto);
-
-	void delete (DTO dto);
+	void delete (ID id);
 
 	void deleteById (ID id);
 
-	Page<DTO> search(String searchQuery, PageRequest pageRequest);
+	Page<ENTITY> search(String searchQuery, PageRequest pageRequest);
 
 	CrudRepository<ENTITY, ID> getRepository();
 
@@ -41,5 +33,5 @@ public interface CrudService <DTO, ENTITY, ID extends Serializable> {
 		return new DictionaryService() {};
 	}
 
-	List<DTO> search(@NotNull String searchQuery);
+	List<ENTITY> search(@NotNull String searchQuery);
 }
