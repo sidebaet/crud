@@ -1,48 +1,34 @@
 package com.debaets.crud.core.service;
 
-import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-
+import com.debaets.crud.core.model.CrudEntity;
+import com.debaets.crud.core.model.Operators;
 import com.debaets.crud.core.model.exception.EntityAlreadyExistsException;
 import com.debaets.crud.core.model.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.core.convert.TypeDescriptor;
+import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.ast.Node;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
-import com.debaets.crud.core.model.CrudEntity;
-import com.debaets.crud.core.model.Operators;
 
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.Node;
+import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
+import java.util.Collections;
+import java.util.List;
 
 @SuppressWarnings({"SpringJavaAutowiredMembersInspection", "unchecked"})
-public abstract class CrudServiceImpl<DTO, ENTITY extends CrudEntity<ID>, ID extends Serializable>
+public abstract class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializable>
 		implements CrudService<ENTITY, ID> {
 
-	@Autowired
-	private ConversionService conversionService;
-
-	private Class<DTO> dtoClassType;
 
 	private Class<ENTITY> entityClassType;
 
 	public CrudServiceImpl(){
-		dtoClassType = (Class<DTO>) ((ParameterizedType) getClass()
-				.getGenericSuperclass()).getActualTypeArguments()[0];
 		entityClassType = (Class<ENTITY>) ((ParameterizedType) getClass()
-				.getGenericSuperclass()).getActualTypeArguments()[1];
+				.getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
 	@PostConstruct
@@ -52,7 +38,6 @@ public abstract class CrudServiceImpl<DTO, ENTITY extends CrudEntity<ID>, ID ext
 
 	@Override
 	public ENTITY findOne(@NotNull ID id) {
-		checkCastEntityToDto();
 		return getRepository().findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+id+" not found"));
 	}
@@ -69,8 +54,6 @@ public abstract class CrudServiceImpl<DTO, ENTITY extends CrudEntity<ID>, ID ext
 
 	@Override
 	public ENTITY create(@Validated @NotNull ENTITY entity) {
-		checkCastDtoToEntity();
-		checkCastEntityToDto();
 		if (entity.getId() != null && getRepository().existsById(entity.getId())) {
 			throw new EntityAlreadyExistsException("Entity with id : " + entity.getId().toString() + ", already exists");
 		}
@@ -116,27 +99,5 @@ public abstract class CrudServiceImpl<DTO, ENTITY extends CrudEntity<ID>, ID ext
 		List<ENTITY> content = getRepository().findAll(spec);
 		content.removeAll(Collections.singleton(null));
 		return content;
-	}
-
-	protected void checkCastEntityToDto() {
-		if (!conversionService.canConvert(entityClassType, dtoClassType)) {
-			throw new ConverterNotFoundException(TypeDescriptor.valueOf(entityClassType),
-					TypeDescriptor.valueOf(dtoClassType));
-		}
-	}
-
-	protected void checkCastDtoToEntity() {
-		if (!conversionService.canConvert(dtoClassType,entityClassType)) {
-			throw new ConverterNotFoundException(TypeDescriptor.valueOf(dtoClassType),
-					TypeDescriptor.valueOf(entityClassType));
-		}
-	}
-
-	protected DTO convertToDto(ENTITY entity) {
-		return conversionService.convert(entity, dtoClassType);
-	}
-
-	protected ENTITY convertToEntity(DTO dto) {
-		return conversionService.convert(dto, entityClassType);
 	}
 }
