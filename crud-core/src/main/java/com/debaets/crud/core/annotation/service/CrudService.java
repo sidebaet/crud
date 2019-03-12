@@ -1,4 +1,4 @@
-package com.debaets.crud.core.annotation;
+package com.debaets.crud.core.annotation.service;
 
 import java.lang.annotation.*;
 

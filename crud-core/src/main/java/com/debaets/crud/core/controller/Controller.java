@@ -7,6 +7,6 @@ import java.io.Serializable;
 
 public interface Controller <DTO, ID extends Serializable> {
 
-	CrudFacade<DTO, ? extends CrudEntity<ID>, ID> getFacade();
+	CrudFacade<DTO, ID> getFacade();
 
 }

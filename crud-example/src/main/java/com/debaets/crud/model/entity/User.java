@@ -1,12 +1,13 @@
 package com.debaets.crud.model.entity;
 
-import com.debaets.crud.core.model.CrudEntity;
-import com.debaets.crud.model.Gender;
-import lombok.Data;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+
+import com.debaets.crud.core.model.CrudEntity;
+import com.debaets.crud.model.Gender;
+
+import lombok.Data;
 
 @Data
 @Entity

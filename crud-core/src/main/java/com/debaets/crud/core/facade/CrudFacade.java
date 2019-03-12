@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
-public interface CrudFacade <DTO, ENTITY, ID extends Serializable> {
+public interface CrudFacade <DTO, ID extends Serializable> {
 
 	DTO findOne(@NotNull ID id);
 
@@ -23,7 +23,5 @@ public interface CrudFacade <DTO, ENTITY, ID extends Serializable> {
 	Page<DTO> search(String query, int page, int pageSize);
 
 	List<DTO> search(@NotNull String searchQuery);
-
-	CrudService<ENTITY, ID> getCrudService();
 
 }
