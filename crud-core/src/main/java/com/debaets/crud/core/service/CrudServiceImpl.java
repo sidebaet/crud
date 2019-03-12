@@ -4,8 +4,12 @@ import com.debaets.crud.core.model.CrudEntity;
 import com.debaets.crud.core.model.Operators;
 import com.debaets.crud.core.model.exception.EntityAlreadyExistsException;
 import com.debaets.crud.core.model.exception.ResourceNotFoundException;
+import com.debaets.crud.core.repository.CrudRepository;
+
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,9 +24,11 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings({"SpringJavaAutowiredMembersInspection", "unchecked"})
-public abstract class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializable>
+public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializable>
 		implements CrudService<ENTITY, ID> {
 
+	@Autowired
+	private CrudRepository<ENTITY, ID> crudRepository;
 
 	private Class<ENTITY> entityClassType;
 
@@ -91,6 +97,16 @@ public abstract class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends 
 		Specification<ENTITY> spec = rootNode.accept(new CustomRsqlVisitor<>(getDictionaryService(), false));
 		return getRepository().findAll(spec, pageRequest);
 	}
+
+	@Override
+	public CrudRepository<ENTITY, ID> getRepository() {
+		return crudRepository;
+	}
+
+	/*@Override
+	public DictionaryService getDictionaryService() {
+		return null;
+	}*/
 
 	@Override
 	public List<ENTITY> search(@NotNull String searchQuery) {

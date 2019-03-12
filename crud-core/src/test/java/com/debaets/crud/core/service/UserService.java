@@ -10,12 +10,4 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService extends CrudServiceImpl<User, Long> {
 
-	@Autowired
-	@Qualifier("testUserRepo")
-	private UserRepository userRepository;
-
-	@Override
-	public CrudRepository<User, Long> getRepository() {
-		return userRepository;
-	}
 }
