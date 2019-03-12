@@ -27,14 +27,15 @@ import java.util.List;
 public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializable>
 		implements CrudService<ENTITY, ID> {
 
-	@Autowired
 	private CrudRepository<ENTITY, ID> crudRepository;
 
 	private Class<ENTITY> entityClassType;
 
-	public CrudServiceImpl(){
-		entityClassType = (Class<ENTITY>) ((ParameterizedType) getClass()
-				.getGenericSuperclass()).getActualTypeArguments()[0];
+	public CrudServiceImpl(Class<ENTITY> entityClassType, CrudRepository<ENTITY,ID> crudRepository){
+		/*entityClassType = (Class<ENTITY>) ((ParameterizedType) getClass()
+				.getGenericSuperclass()).getActualTypeArguments()[0];*/
+		this.entityClassType = entityClassType;
+		this.crudRepository = crudRepository;
 	}
 
 	@PostConstruct

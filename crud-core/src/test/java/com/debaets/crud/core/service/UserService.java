@@ -10,4 +10,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService extends CrudServiceImpl<User, Long> {
 
+	@Autowired
+	public UserService(UserRepository userRepository) {
+		super(User.class, userRepository);
+	}
 }

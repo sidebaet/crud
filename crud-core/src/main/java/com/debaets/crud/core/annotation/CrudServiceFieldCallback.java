@@ -9,6 +9,9 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+
+import com.debaets.crud.core.repository.CrudRepository;
 
 @Log4j2
 public class CrudServiceFieldCallback implements ReflectionUtils.FieldCallback {
@@ -58,15 +61,16 @@ public class CrudServiceFieldCallback implements ReflectionUtils.FieldCallback {
         }
     }
 
-    private Object getBeanInstance(String beanName, Class<?> genericClass, Class<?> paramClass) {
+    private Object getBeanInstance(String beanName, Class<?> genericClass, Class<?> entityClass) {
         Object crudServiceInstance;
         if (!configurableBeanFactory.containsBean(beanName)) {
             log.info("Creating new CrudService bean named '{}'", beanName);
 
             Object toRegister;
             try {
-                var constructor = genericClass.getConstructor(Class.class);
-                toRegister = constructor.newInstance(paramClass);
+                var constructor = genericClass.getConstructor(Class.class, CrudRepository.class);
+                var repositoryBeanName = entityClass.getSimpleName().toLowerCase()+"Repository";
+                toRegister = constructor.newInstance(entityClass, configurableBeanFactory.getBean(repositoryBeanName));
             } catch (Exception e){
                 log.error(ERROR_CREATE_INSTANCE, genericClass.getTypeName(), e);
                 throw new RuntimeException(e);
