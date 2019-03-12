@@ -25,8 +25,6 @@ public interface CrudService <ENTITY, ID extends Serializable> {
 
 	Page<ENTITY> search(String searchQuery, PageRequest pageRequest);
 
-	CrudRepository<ENTITY, ID> getRepository();
-
 	default DictionaryService getDictionaryService(){
 		return new DictionaryService() {};
 	}

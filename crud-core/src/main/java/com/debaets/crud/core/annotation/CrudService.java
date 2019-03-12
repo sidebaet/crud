@@ -8,4 +8,5 @@ import java.lang.annotation.*;
 public @interface CrudService {
 
     Class<?> entity();
+
 }

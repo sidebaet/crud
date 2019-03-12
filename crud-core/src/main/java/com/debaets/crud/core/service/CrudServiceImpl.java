@@ -27,25 +27,29 @@ import java.util.List;
 public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializable>
 		implements CrudService<ENTITY, ID> {
 
-	private CrudRepository<ENTITY, ID> crudRepository;
 
 	private Class<ENTITY> entityClassType;
 
-	public CrudServiceImpl(Class<ENTITY> entityClassType, CrudRepository<ENTITY,ID> crudRepository){
-		/*entityClassType = (Class<ENTITY>) ((ParameterizedType) getClass()
-				.getGenericSuperclass()).getActualTypeArguments()[0];*/
+	private final CrudRepository<ENTITY, ID> crudRepository;
+	private final DictionaryService dictionaryService;
+
+	public CrudServiceImpl(Class<ENTITY> entityClassType,
+			CrudRepository<ENTITY,ID> crudRepository,
+			DictionaryService dictionaryService){
 		this.entityClassType = entityClassType;
 		this.crudRepository = crudRepository;
+		this.dictionaryService = dictionaryService;
 	}
 
 	@PostConstruct
 	public void postConstruct() {
-		assert (getRepository() != null);
+		assert (crudRepository != null);
+		assert (dictionaryService != null);
 	}
 
 	@Override
 	public ENTITY findOne(@NotNull ID id) {
-		return getRepository().findById(id)
+		return crudRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+id+" not found"));
 	}
 
@@ -54,66 +58,57 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 		if (CollectionUtils.isEmpty(ids)){
 			return Collections.emptyList();
 		}
-		List<ENTITY> entities = getRepository().findAll();
+		List<ENTITY> entities = crudRepository.findAll();
 		entities.removeAll(Collections.singleton(null));
 		return entities;
 	}
 
 	@Override
 	public ENTITY create(@Validated @NotNull ENTITY entity) {
-		if (entity.getId() != null && getRepository().existsById(entity.getId())) {
+		if (entity.getId() != null && crudRepository.existsById(entity.getId())) {
 			throw new EntityAlreadyExistsException("Entity with id : " + entity.getId().toString() + ", already exists");
 		}
-		return getRepository().save(entity);
+		return crudRepository.save(entity);
 	}
 
 	@Override
 	public ENTITY update(@NotNull ID id, @Validated @NotNull ENTITY entityToUpdate) {
-		if (!getRepository().existsById(id)){
+		if (!crudRepository.existsById(id)){
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+id+" not found");
 		}
 		entityToUpdate.setId(id);
-		return getRepository().save(entityToUpdate);
+		return crudRepository.save(entityToUpdate);
 	}
 
 	@Override
 	public void delete(ID id) {
-		if (!getRepository().existsById(id)){
+		if (!crudRepository.existsById(id)){
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+ id +" not found");
 		}
-		getRepository().deleteById(id);
+		crudRepository.deleteById(id);
 	}
 
 	@Override
 	public void deleteById(@NotNull ID id) {
-		if (!getRepository().existsById(id)){
+		if (!crudRepository.existsById(id)){
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+ id +" not found");
 		}
-		getRepository().deleteById(id);
+		crudRepository.deleteById(id);
 	}
 
 	@Override
 	public Page<ENTITY> search(@NotNull String searchQuery, PageRequest pageRequest) {
 		Node rootNode = new RSQLParser(Operators.getOperators()).parse(searchQuery);
 		Specification<ENTITY> spec = rootNode.accept(new CustomRsqlVisitor<>(getDictionaryService(), false));
-		return getRepository().findAll(spec, pageRequest);
+		return crudRepository.findAll(spec, pageRequest);
 	}
-
-	@Override
-	public CrudRepository<ENTITY, ID> getRepository() {
-		return crudRepository;
-	}
-
-	/*@Override
-	public DictionaryService getDictionaryService() {
-		return null;
-	}*/
+	
 
 	@Override
 	public List<ENTITY> search(@NotNull String searchQuery) {
 		Node rootNode = new RSQLParser(Operators.getOperators()).parse(searchQuery);
 		Specification<ENTITY> spec = rootNode.accept(new CustomRsqlVisitor<>(getDictionaryService(), true));
-		List<ENTITY> content = getRepository().findAll(spec);
+		List<ENTITY> content = crudRepository.findAll(spec);
 		content.removeAll(Collections.singleton(null));
 		return content;
 	}

@@ -9,9 +9,9 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 
 import com.debaets.crud.core.repository.CrudRepository;
+import com.debaets.crud.core.service.DictionaryService;
 
 @Log4j2
 public class CrudServiceFieldCallback implements ReflectionUtils.FieldCallback {
@@ -68,9 +68,10 @@ public class CrudServiceFieldCallback implements ReflectionUtils.FieldCallback {
 
             Object toRegister;
             try {
-                var constructor = genericClass.getConstructor(Class.class, CrudRepository.class);
+                var constructor = genericClass.getConstructor(Class.class, CrudRepository.class, DictionaryService.class);
                 var repositoryBeanName = entityClass.getSimpleName().toLowerCase()+"Repository";
-                toRegister = constructor.newInstance(entityClass, configurableBeanFactory.getBean(repositoryBeanName));
+                toRegister = constructor.newInstance(
+                        entityClass, (CrudRepository)configurableBeanFactory.getBean(repositoryBeanName), getDictionaryService(entityClass));
             } catch (Exception e){
                 log.error(ERROR_CREATE_INSTANCE, genericClass.getTypeName(), e);
                 throw new RuntimeException(e);
@@ -85,5 +86,13 @@ public class CrudServiceFieldCallback implements ReflectionUtils.FieldCallback {
             log.info("Bean named '{}' already exists used as current bean reference.", beanName);
         }
         return crudServiceInstance;
+    }
+
+    private DictionaryService getDictionaryService(Class<?> entityClass) {
+        var dictionaryBeanName = entityClass.getSimpleName().toLowerCase()+"DictionaryService";
+        if (configurableBeanFactory.containsBean(dictionaryBeanName)){
+            return (DictionaryService) configurableBeanFactory.getBean(dictionaryBeanName);
+        }
+        return new DictionaryService() {};
     }
 }
