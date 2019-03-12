@@ -12,4 +12,12 @@
     <artifactId>crud-core</artifactId>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>4.3.13.RELEASE</version>
+        </dependency>
+    </dependencies>
+
 </project>
