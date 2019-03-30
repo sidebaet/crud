@@ -8,28 +8,28 @@ import java.io.Serializable;
 
 public interface CrudControllerComplexId <DTO, ID extends Serializable> extends Controller<DTO, ID> {
 
-	@RequestMapping(path = "/id", method = RequestMethod.GET)
+	@GetMapping(path = "/id")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	default DTO findOne(ID id){
 		return getFacade().findOne(id);
 	}
 
-	@RequestMapping(path = "/", method = RequestMethod.POST)
+	@PostMapping(path = "/")
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
 	default DTO create(@Validated @RequestBody DTO dto){
 		return 	getFacade().create(dto);
 	}
 
-	@RequestMapping(path = "/id", method = RequestMethod.PUT)
+	@PutMapping(path = "/id")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	default DTO update(ID id, @Validated @RequestBody DTO dto){
 		return getFacade().update(id, dto);
 	}
 
-	@RequestMapping(path = "/id", method = RequestMethod.DELETE)
+	@DeleteMapping(path = "/id")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	default void delete(ID id){
 		getFacade().delete(id);
