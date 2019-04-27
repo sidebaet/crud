@@ -1,5 +1,6 @@
 package com.debaets.crud.core.facade;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -92,7 +93,14 @@ public class CrudFacadeImpl<DTO, ENTITY, ID extends Serializable>
 	public Page<DTO> search(String query, int page, int pageSize) {
 		checkCastEntityToDto();
 		PageRequest pageRequest = new PageRequest(page, pageSize);
-		Page<ENTITY> result = crudService.search(query, pageRequest);
+
+		Page<ENTITY> result;
+		if (StringUtils.isEmpty(query)){
+			result = crudService.findAll(pageRequest);
+		}
+		else {
+			result = crudService.search(query, pageRequest);
+		}
 		List<ENTITY> content = result.getContent();
 
 		if (result.isEmpty()){
@@ -108,6 +116,11 @@ public class CrudFacadeImpl<DTO, ENTITY, ID extends Serializable>
 	@Override
 	public List<DTO> search(@NotNull String searchQuery) {
 		checkCastEntityToDto();
+		if (StringUtils.isEmpty(searchQuery)){
+			return (List<DTO>) conversionService.convert(crudService.findAll(),
+					TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(entityClassType)),
+					TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(dtoClassType)));
+		}
 		return (List<DTO>) conversionService.convert(crudService.search(searchQuery),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(entityClassType)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(dtoClassType)));

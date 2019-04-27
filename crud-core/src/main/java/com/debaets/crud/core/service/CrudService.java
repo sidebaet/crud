@@ -30,4 +30,8 @@ public interface CrudService <ENTITY, ID extends Serializable> {
 	}
 
 	List<ENTITY> search(@NotNull String searchQuery);
+
+	Page <ENTITY> findAll(PageRequest pageRequest);
+
+	List<ENTITY> findAll();
 }

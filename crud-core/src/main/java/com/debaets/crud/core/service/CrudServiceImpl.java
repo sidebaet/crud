@@ -112,4 +112,14 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 		content.removeAll(Collections.singleton(null));
 		return content;
 	}
+
+	@Override
+	public Page<ENTITY> findAll(PageRequest pageRequest) {
+		return crudRepository.findAll(pageRequest);
+	}
+
+	@Override
+	public List<ENTITY> findAll() {
+		return crudRepository.findAll();
+	}
 }
