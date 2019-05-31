@@ -7,13 +7,14 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 
 public class CustomRsqlVisitor<T> implements RSQLVisitor<Specification<T>, Void> {
 
 	private GenericRsqlSpecBuilder<T> builder;
 
 	public CustomRsqlVisitor(@NotNull DictionaryService dictionaryService, boolean isDistinct) {
-		builder = new GenericRsqlSpecBuilder<>(dictionaryService, isDistinct);
+		builder = new GenericRsqlSpecBuilder<>(dictionaryService, isDistinct, new HashMap<>());
 	}
 
 	@Override

@@ -2,16 +2,15 @@ package com.debaets.crud.core.model;
 
 import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.jpa.criteria.path.PluralAttributePath;
+import org.hibernate.query.criteria.internal.path.PluralAttributePath;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class GenericRsqlSpecification<T> implements Specification<T> {
@@ -19,21 +18,29 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	private ComparisonOperator operator;
 	private List<String> arguments;
 	private boolean isDistinct;
+	private Map<String, Join> joinMap;
+	private Set<CriteriaQuery<?>> knownQueries;
+	private boolean canJoin;
 
 	private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	public GenericRsqlSpecification(String property, ComparisonOperator operator, List<String> arguments,
-			boolean isDistinct) {
+									boolean isDistinct, Map<String, Join> joinMap) {
 		super();
 		this.property = property;
 		this.operator = operator;
 		this.arguments = arguments;
 
 		this.isDistinct = isDistinct;
+		this.joinMap = joinMap;
+		this.knownQueries = new HashSet<>();
 	}
 
 	@Override
 	public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+		canJoin = !knownQueries.contains(query);
+		knownQueries.add(query);
 		List<Object> args = castArguments(root);
 		Object argument = args.get(0);
 		Path<String> path = (Path<String>) getPath(root, property);
@@ -44,31 +51,43 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	private Predicate getPredicate(CriteriaBuilder builder, List<Object> args, Object argument, Path<String> path) {
 		switch (Objects.requireNonNull(RsqlSearchOperation.getSimpleOperator(operator))) {
 
-		case EQUAL:
-			return getEquals(builder, argument, path);
-		case NOT_EQUAL:
-			return getNotEquals(builder, argument, path);
-		case GREATER_THAN:
-			return getGreaterThan(builder, argument, path);
-		case GREATER_THAN_OR_EQUAL:
-			return getGreaterThanOrEquals(builder, argument, path);
-		case LESS_THAN:
-			return getLessThan(builder, argument, path);
-		case LESS_THAN_OR_EQUAL:
-			return getLessThanOrEqual(builder, argument, path);
-		case IN:
-			return getIn(args, path);
-		case NOT_IN:
-			return getIn(builder, args, path);
-		case BETWEEN:
-			return getBetween(builder, args, path);
+			case EQUAL:
+				return getEquals(builder, argument, path);
+			case NOT_EQUAL:
+				return getNotEquals(builder, argument, path);
+			case GREATER_THAN:
+				return getGreaterThan(builder, argument, path);
+			case GREATER_THAN_OR_EQUAL:
+				return getGreaterThanOrEquals(builder, argument, path);
+			case LESS_THAN:
+				return getLessThan(builder, argument, path);
+			case LESS_THAN_OR_EQUAL:
+				return getLessThanOrEqual(builder, argument, path);
+			case IN:
+				return getIn(args, path);
+			case NOT_IN:
+				return getIn(builder, args, path);
+			case BETWEEN:
+				return getBetween(builder, args, path);
 		}
 
 		return null;
 	}
 
+	private Predicate getIsNull(CriteriaBuilder builder, Object argument, Path<String> path) {
+		if (argument == null || "true".equalsIgnoreCase(argument.toString())) {
+			return builder.isNull(path);
+		}
+		return builder.isNotNull(path);
+	}
+
 	private Predicate getBetween(CriteriaBuilder builder, List<Object> args, Path<String> path) {
-		return builder.between(path.as(Date.class), (Date) args.get(0), (Date) args.get(1));
+
+		Object arg = args.get(0);
+		if (arg instanceof Date) {
+			return builder.between(path.as(Date.class), (Date) arg, (Date) args.get(1));
+		}
+		return builder.between(path.as(LocalDate.class), (LocalDate) arg, (LocalDate) args.get(1));
 	}
 
 	private Predicate getIn(CriteriaBuilder builder, List<Object> args, Path<String> path) {
@@ -82,6 +101,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	private Predicate getLessThanOrEqual(CriteriaBuilder builder, Object argument, Path<String> path) {
 		if (argument instanceof Date) {
 			return builder.lessThanOrEqualTo(path.as(Date.class), (Date) argument);
+		} else if (argument instanceof LocalDate) {
+			return builder.lessThanOrEqualTo(path.as(LocalDate.class), (LocalDate) argument);
 		}
 		return builder.lessThanOrEqualTo(
 				path, argument.toString());
@@ -90,6 +111,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	private Predicate getLessThan(CriteriaBuilder builder, Object argument, Path<String> path) {
 		if (argument instanceof Date) {
 			return builder.lessThan(path.as(Date.class), (Date) argument);
+		} else if (argument instanceof LocalDate) {
+			return builder.lessThan(path.as(LocalDate.class), (LocalDate) argument);
 		}
 		return builder.lessThan(path, argument.toString());
 	}
@@ -97,6 +120,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	private Predicate getGreaterThanOrEquals(CriteriaBuilder builder, Object argument, Path<String> path) {
 		if (argument instanceof Date) {
 			return builder.greaterThanOrEqualTo(path.as(Date.class), (Date) argument);
+		} else if (argument instanceof LocalDate) {
+			return builder.greaterThanOrEqualTo(path.as(LocalDate.class), (LocalDate) argument);
 		}
 		return builder.greaterThanOrEqualTo(
 				path, argument.toString());
@@ -105,6 +130,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	private Predicate getGreaterThan(CriteriaBuilder builder, Object argument, Path<String> path) {
 		if (argument instanceof Date) {
 			return builder.greaterThan(path.as(Date.class), (Date) argument);
+		} else if (argument instanceof LocalDate) {
+			return builder.greaterThan(path.as(LocalDate.class), (LocalDate) argument);
 		}
 		return builder.greaterThan(path, argument.toString());
 	}
@@ -115,6 +142,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 					builder.upper(path), argument.toString().toUpperCase().replace('*', '%'));
 		} else if (argument instanceof Date) {
 			return builder.notEqual(path.as(Date.class), argument);
+		} else if (argument instanceof LocalDate) {
+			return builder.notEqual(path.as(LocalDate.class), argument);
 		} else if (argument == null) {
 			return builder.isNotNull(path);
 		} else {
@@ -122,18 +151,24 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 		}
 	}
 
-	private Predicate getEquals(CriteriaBuilder builder, Object argument, Path<String> path) {
-		if (argument instanceof String) {
+	private Predicate getEquals(CriteriaBuilder builder, Object argument, Path<?> path) {
+		var type = path.getJavaType();
+		if (argument == null) {
+			return builder.isNull(path);
+		}
+		if (type.equals(String.class)) {
 			String argumentString = argument.toString();
 			if (argumentString.contains("*")) {
 				return builder.like(
-						builder.upper(path), argumentString.toUpperCase().replace('*', '%'));
+						builder.upper(path.as(String.class)), argumentString.toUpperCase().replace('*', '%'));
 			}
-			return builder.equal(builder.upper(path), argumentString.toUpperCase());
-		} else if (argument instanceof Date) {
+			return builder.equal(builder.upper(path.as(String.class)), argumentString.toUpperCase());
+		} else if (type.equals(Date.class)) {
 			return builder.equal(path.as(Date.class), argument);
-		} else if (argument == null) {
-			return builder.isNull(path);
+		} else if (type.equals(LocalDate.class)) {
+			return builder.equal(path.as(LocalDate.class), argument);
+		} else if (type.equals(Boolean.class)) {
+			return builder.equal(path.as(Boolean.class), Boolean.valueOf(argument.toString()));
 		} else {
 			return builder.equal(path, argument);
 		}
@@ -155,6 +190,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 				} catch (ParseException e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
+			} else if (type.equals(LocalDate.class)) {
+				args.add(LocalDate.parse(argument, formatter));
 			} else if (type.getEnumConstants() != null && type.getEnumConstants().length > 0) {
 				args.add(Enum.valueOf((Class<? extends Enum>) type, argument));
 			} else {
@@ -173,7 +210,16 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 		Path<T> path = root.get(properties[0]);
 
 		if (path instanceof PluralAttributePath) {
-			path = root.join(properties[0]);
+			var propertyJoin = properties[0];
+			if (canJoin) {
+				var join = root.join(propertyJoin);
+				if (!this.joinMap.containsKey(propertyJoin)) {
+					this.joinMap.put(propertyJoin, join);
+					//root.fetch(propertyJoin);
+				}
+				canJoin = false;
+			}
+			path = this.joinMap.get(propertyJoin);
 		}
 
 		for (int i = 1; i < properties.length; ++i) {
