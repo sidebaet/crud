@@ -99,7 +99,7 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	@Override
 	public Page<ENTITY> search(@NotNull String searchQuery, PageRequest pageRequest) {
 		Node rootNode = new RSQLParser(Operators.getOperators()).parse(searchQuery);
-		Specification<ENTITY> spec = rootNode.accept(new CustomRsqlVisitor<>(getDictionaryService(), false));
+		Specification<ENTITY> spec = rootNode.accept(new CustomRsqlVisitor<>(getDictionaryService(), true));
 		return crudRepository.findAll(spec, pageRequest);
 	}
 	
