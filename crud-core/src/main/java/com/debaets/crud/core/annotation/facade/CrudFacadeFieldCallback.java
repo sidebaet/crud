@@ -40,7 +40,7 @@ public class CrudFacadeFieldCallback
 
 		if (genericTypeIsValid(dtoValue, fieldGenericType, 0)
 			&& genericTypeIsValid(entityValue, fieldGenericType, 1)) {
-			var beanName = entityValue.getSimpleName() + generic.getSimpleName();
+			var beanName = dtoValue.getSimpleName() + entityValue.getSimpleName() + generic.getSimpleName();
 			var beanInstance = getBeanInstance(beanName, generic, entityValue, dtoValue);
 			field.set(bean, beanInstance);
 		} else {
