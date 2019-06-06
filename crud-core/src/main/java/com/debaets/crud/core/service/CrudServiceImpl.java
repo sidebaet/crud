@@ -9,7 +9,6 @@ import com.debaets.crud.core.repository.CrudRepository;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,13 +30,17 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 
 	private final CrudRepository<ENTITY, ID> crudRepository;
 	private final DictionaryService dictionaryService;
+	private final ValidationService validationService;
 
 	public CrudServiceImpl(Class<ENTITY> entityClassType,
-			CrudRepository<ENTITY,ID> crudRepository,
-			DictionaryService dictionaryService){
+						   CrudRepository<ENTITY,ID> crudRepository,
+						   DictionaryService dictionaryService,
+						   ValidationService validationService
+						   ){
 		this.entityClassType = entityClassType;
 		this.crudRepository = crudRepository;
 		this.dictionaryService = dictionaryService;
+		this.validationService = validationService;
 	}
 
 	@PostConstruct
@@ -68,6 +70,7 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 		if (entity.getId() != null && crudRepository.existsById(entity.getId())) {
 			throw new EntityAlreadyExistsException("Entity with id : " + entity.getId().toString() + ", already exists");
 		}
+		validationService.validateForCreate(entity);
 		return crudRepository.save(entity);
 	}
 
@@ -77,6 +80,7 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+id+" not found");
 		}
 		entityToUpdate.setId(id);
+		validationService.validateForUpdate(entityToUpdate);
 		return crudRepository.save(entityToUpdate);
 	}
 

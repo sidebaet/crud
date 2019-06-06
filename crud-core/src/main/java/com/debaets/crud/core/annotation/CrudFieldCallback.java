@@ -3,6 +3,7 @@ package com.debaets.crud.core.annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import com.debaets.crud.core.service.ValidationService;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
@@ -32,10 +33,15 @@ public abstract class CrudFieldCallback {
 
 			Object toRegister;
 			try {
-				var constructor = genericClass.getConstructor(Class.class, CrudRepository.class, DictionaryService.class);
+				var constructor = genericClass.getConstructor(Class.class, CrudRepository.class,
+						DictionaryService.class, ValidationService.class);
 				var repositoryBeanName = entityClass.getSimpleName().toLowerCase()+"Repository";
 				toRegister = constructor.newInstance(
-						entityClass, (CrudRepository)configurableBeanFactory.getBean(repositoryBeanName), getDictionaryService(entityClass));
+						entityClass,
+						(CrudRepository)configurableBeanFactory.getBean(repositoryBeanName),
+						getDictionaryService(entityClass),
+						getValidationService(entityClass)
+						);
 			} catch (Exception e){
 				log.error(ERROR_CREATE_INSTANCE, genericClass.getTypeName(), e);
 				throw new RuntimeException(e);
@@ -50,6 +56,14 @@ public abstract class CrudFieldCallback {
 			log.info("Bean named '{}' already exists used as current bean reference.", beanName);
 		}
 		return crudServiceInstance;
+	}
+
+	private ValidationService getValidationService(Class<?> entityClass) {
+		var validationBeanName = entityClass.getSimpleName().toLowerCase()+"ValidationService";
+		if (configurableBeanFactory.containsBean(validationBeanName)){
+			return (ValidationService) configurableBeanFactory.getBean(validationBeanName);
+		}
+		return new ValidationService() {};
 	}
 
 	private DictionaryService getDictionaryService(Class<?> entityClass) {

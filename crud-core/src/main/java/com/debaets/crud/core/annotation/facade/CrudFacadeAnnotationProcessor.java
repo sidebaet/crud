@@ -7,7 +7,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import com.debaets.crud.core.annotation.service.CrudServiceFieldCallback;
 
 @Component
 public class CrudFacadeAnnotationProcessor implements BeanPostProcessor {
