@@ -1,6 +1,5 @@
 package com.debaets.crud.core.facade;
 
-import com.debaets.crud.core.service.CrudService;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 
@@ -17,6 +16,8 @@ public interface CrudFacade <DTO, ID extends Serializable> {
 	DTO create(@NotNull @Validated DTO dto);
 
 	DTO update(@NotNull ID id, @NotNull @Validated DTO dto);
+
+	List<DTO> updateAll(@NotNull @Validated List<DTO> dtos);
 
 	void delete(@NotNull ID id);
 

@@ -1,6 +1,5 @@
 package com.debaets.crud.core.service;
 
-import com.debaets.crud.core.repository.CrudRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
@@ -15,9 +14,9 @@ public interface CrudService <ENTITY, ID extends Serializable> {
 
 	List<ENTITY>  findByIds(List<ID> ids);
 
-	ENTITY create(@Validated ENTITY dto);
+	ENTITY create(@Validated ENTITY entity);
 
-	ENTITY update(ID id, @Validated ENTITY dto);
+	ENTITY update(ID id, @Validated ENTITY entity);
 
 	void delete (ID id);
 

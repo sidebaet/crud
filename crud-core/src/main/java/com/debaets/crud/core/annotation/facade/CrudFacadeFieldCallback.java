@@ -1,17 +1,15 @@
 package com.debaets.crud.core.annotation.facade;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-
+import com.debaets.crud.core.annotation.CrudFieldCallback;
+import com.debaets.crud.core.service.CrudService;
+import com.debaets.crud.core.service.CrudServiceImpl;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.ReflectionUtils;
 
-import com.debaets.crud.core.annotation.CrudFieldCallback;
-import com.debaets.crud.core.service.CrudService;
-import com.debaets.crud.core.service.CrudServiceImpl;
-
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 @Log4j2
 public class CrudFacadeFieldCallback
@@ -51,7 +49,7 @@ public class CrudFacadeFieldCallback
 	protected Object getBeanInstance(String beanName, Class<?> genericClass, Class<?> entityClass, Class<?> dtoClass) {
 		Object crudFacadeInstance;
 		if (!configurableBeanFactory.containsBean(beanName)) {
-			log.info("Creating new CrudService bean named '{}'", beanName);
+			log.info("Creating new CrudFacade bean named '{}'", beanName);
 
 			Object toRegister;
 			try {

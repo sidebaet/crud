@@ -5,10 +5,8 @@ import com.debaets.crud.core.model.Operators;
 import com.debaets.crud.core.model.exception.EntityAlreadyExistsException;
 import com.debaets.crud.core.model.exception.ResourceNotFoundException;
 import com.debaets.crud.core.repository.CrudRepository;
-
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
