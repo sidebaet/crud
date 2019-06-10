@@ -1,9 +1,6 @@
 package com.debaets.crud.core.service.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -12,6 +9,8 @@ import javax.persistence.*;
 @EqualsAndHashCode
 @ToString
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Period {
 
     @Id

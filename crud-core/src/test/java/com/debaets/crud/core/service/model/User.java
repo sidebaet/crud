@@ -35,7 +35,7 @@ public class User implements CrudEntity<Long> {
 
 	private LocalDate weddingDate;
 
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Period> periods;
 
 	private Boolean isAlive;

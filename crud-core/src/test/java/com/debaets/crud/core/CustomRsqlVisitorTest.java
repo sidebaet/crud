@@ -12,7 +12,6 @@ import com.debaets.crud.core.service.repository.UserRepository;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.isIn;
@@ -371,12 +370,19 @@ public class CustomRsqlVisitorTest {
 
 	//Test search on inside list
 	@Test
-	@Ignore
 	public void insideList_start_should_return() {
 
-		Period period = Period.builder().start(1L).start(15L).user(userJohn).build();
-		periodRepository.save(period);
-		periodRepository.save(Period.builder().start(20L).end(25L).user(userJohn).build());
+		var period1_15 = Period.builder().start(1L).end(15L).user(userJohn).build();
+		var period20_25 = Period.builder().start(20L).end(25L).user(userJohn).build();
+
+		var periods = new ArrayList<Period>();
+
+		periods.add(period1_15);
+		periods.add(period20_25);
+
+		userJohn.setPeriods(periods);
+		repository.save(userJohn);
+
 		Node rootNode = new RSQLParser().parse("periods.start<=10");
 		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},true));
 		List<User> results = repository.findAll(spec);
