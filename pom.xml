@@ -22,7 +22,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<rsql.version>2.1.0</rsql.version>
-		<mapstruct.version>1.2.0.Final</mapstruct.version>
+		<mapstruct.version>1.3.0.Final</mapstruct.version>
 		<springfox.version>2.9.2</springfox.version>
 	</properties>
 
