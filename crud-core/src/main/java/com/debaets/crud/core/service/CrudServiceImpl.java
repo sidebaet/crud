@@ -30,15 +30,19 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	private final DictionaryService dictionaryService;
 	private final ValidationService validationService;
 
+	private final List<Command<ENTITY>> updateCommands;
+
 	public CrudServiceImpl(Class<ENTITY> entityClassType,
 						   CrudRepository<ENTITY,ID> crudRepository,
 						   DictionaryService dictionaryService,
-						   ValidationService validationService
+						   ValidationService validationService,
+						   List<Command<ENTITY>> updateCommands
 						   ){
 		this.entityClassType = entityClassType;
 		this.crudRepository = crudRepository;
 		this.dictionaryService = dictionaryService;
 		this.validationService = validationService;
+		this.updateCommands = updateCommands;
 	}
 
 	@PostConstruct
@@ -79,6 +83,9 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 		}
 		entityToUpdate.setId(id);
 		validationService.validateForUpdate(entityToUpdate);
+		if (!CollectionUtils.isEmpty(updateCommands)){
+			updateCommands.forEach(entityCommand -> entityCommand.execute(entityToUpdate));
+		}
 		return crudRepository.save(entityToUpdate);
 	}
 
@@ -124,4 +131,5 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	public List<ENTITY> findAll() {
 		return crudRepository.findAll();
 	}
+
 }

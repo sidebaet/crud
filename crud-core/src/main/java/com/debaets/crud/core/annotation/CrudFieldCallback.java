@@ -1,16 +1,18 @@
 package com.debaets.crud.core.annotation;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
+import com.debaets.crud.core.annotation.command.CrudUpdateCommand;
+import com.debaets.crud.core.repository.CrudRepository;
+import com.debaets.crud.core.service.Command;
+import com.debaets.crud.core.service.DictionaryService;
 import com.debaets.crud.core.service.ValidationService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
-import com.debaets.crud.core.repository.CrudRepository;
-import com.debaets.crud.core.service.DictionaryService;
-
-import lombok.extern.log4j.Log4j2;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Log4j2
 public abstract class CrudFieldCallback {
@@ -34,13 +36,14 @@ public abstract class CrudFieldCallback {
 			Object toRegister;
 			try {
 				var constructor = genericClass.getConstructor(Class.class, CrudRepository.class,
-						DictionaryService.class, ValidationService.class);
+						DictionaryService.class, ValidationService.class, List.class);
 				var repositoryBeanName = entityClass.getSimpleName().toLowerCase()+"Repository";
 				toRegister = constructor.newInstance(
 						entityClass,
 						(CrudRepository)configurableBeanFactory.getBean(repositoryBeanName),
 						getDictionaryService(entityClass),
-						getValidationService(entityClass)
+						getValidationService(entityClass),
+						getUpdateCommands(entityClass)
 						);
 			} catch (Exception e){
 				log.error(ERROR_CREATE_INSTANCE, genericClass.getTypeName(), e);
@@ -73,6 +76,16 @@ public abstract class CrudFieldCallback {
 		}
 		return new DictionaryService() {};
 	}
+
+	private List<Command> getUpdateCommands(Class<?> entityClass){
+		var updateCommands = configurableBeanFactory.getBeansWithAnnotation(CrudUpdateCommand.class);
+		return updateCommands.values().stream()
+				.filter(o -> entityClass.equals(o.getClass().getAnnotation(CrudUpdateCommand.class).entity()))
+				.filter(o -> Command.class.isAssignableFrom(o.getClass()))
+				.map(Command.class::cast)
+				.collect(Collectors.toList());
+	}
+
 
 	protected boolean genericTypeIsValid(Class<?> clazz, Type field, int typeIndex) {
 		if (field instanceof ParameterizedType) {

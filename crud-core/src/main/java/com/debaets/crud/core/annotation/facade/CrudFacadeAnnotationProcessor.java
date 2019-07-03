@@ -4,11 +4,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 
 @Component
+@Order(12)
 public class CrudFacadeAnnotationProcessor implements BeanPostProcessor {
 
 	private final ConfigurableListableBeanFactory configurableListableBeanFactory;

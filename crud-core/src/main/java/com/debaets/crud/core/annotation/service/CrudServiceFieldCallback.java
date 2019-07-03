@@ -1,14 +1,12 @@
 package com.debaets.crud.core.annotation.service;
 
+import com.debaets.crud.core.annotation.CrudFieldCallback;
 import lombok.extern.log4j.Log4j2;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-
-import com.debaets.crud.core.annotation.CrudFieldCallback;
 
 @Log4j2
 public class CrudServiceFieldCallback
@@ -43,4 +41,6 @@ public class CrudServiceFieldCallback
             throw new IllegalArgumentException(ERROR_ENTITY_VALUE_NOT_SAME);
         }
     }
+
+
 }

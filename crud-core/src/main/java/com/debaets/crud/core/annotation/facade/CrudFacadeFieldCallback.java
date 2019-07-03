@@ -54,7 +54,7 @@ public class CrudFacadeFieldCallback
 			Object toRegister;
 			try {
 				var constructor = genericClass.getConstructor(Class.class, Class.class, ConversionService.class, CrudService.class);
-				var serviceBeanName = entityClass.getSimpleName().toLowerCase()+"CrudServiceImpl";
+				var serviceBeanName = getServiceName(entityClass);
 				var serviceBeanInstance = (CrudServiceImpl)getServiceBeanInstance(serviceBeanName, CrudServiceImpl.class, entityClass);
 				toRegister = constructor.newInstance(
 						dtoClass,entityClass, configurableBeanFactory.getBean(ConversionService.class), serviceBeanInstance);
@@ -72,6 +72,10 @@ public class CrudFacadeFieldCallback
 			log.info("Bean named '{}' already exists used as current bean reference.", beanName);
 		}
 		return crudFacadeInstance;
+	}
+
+	public static String getServiceName(Class<?> entityClass){
+		return entityClass.getSimpleName().toLowerCase()+"CrudServiceImpl";
 	}
 
 }
