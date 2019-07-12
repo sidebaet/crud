@@ -21,7 +21,7 @@ public interface CrudFacade <DTO, ID extends Serializable> {
 
 	void delete(@NotNull ID id);
 
-	Page<DTO> search(String query, int page, int pageSize);
+	Page<DTO> search(@NotNull String query, int page, int pageSize, String sort);
 
 	List<DTO> search(@NotNull String searchQuery);
 
