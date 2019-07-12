@@ -10,6 +10,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -112,9 +113,9 @@ public class CrudFacadeImpl<DTO, ENTITY extends CrudEntity<ID>, ID extends Seria
 	}
 
 	@Override
-	public Page<DTO> search(String query, int page, int pageSize, String sort) {
+	public Page<DTO> search(String query, int page, int pageSize, String sort, String direction) {
 		checkCastEntityToDto();
-		PageRequest pageRequest = new PageRequest(page, pageSize);
+		PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.Direction.fromString(direction), sort);
 
 		Page<ENTITY> result;
 		if (StringUtils.isEmpty(query)){

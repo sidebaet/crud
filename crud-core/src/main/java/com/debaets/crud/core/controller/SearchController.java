@@ -16,8 +16,10 @@ public interface SearchController <DTO, ID extends Serializable> extends Control
 	default Page<DTO> search(@RequestParam("query") String query,
 							 @RequestParam("page") int page,
 							 @RequestParam("pageSize") int pageSize,
-							 @RequestParam("sort") String sort){
-		return getFacade().search(query, page, pageSize, sort);
+							 @RequestParam("sort") String sort,
+							 @RequestParam("direction") String direction
+							 ){
+		return getFacade().search(query, page, pageSize, sort, direction);
 	}
 
 	@GetMapping
