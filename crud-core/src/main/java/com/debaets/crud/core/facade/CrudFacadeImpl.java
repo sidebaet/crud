@@ -115,7 +115,13 @@ public class CrudFacadeImpl<DTO, ENTITY extends CrudEntity<ID>, ID extends Seria
 	@Override
 	public Page<DTO> search(String query, int page, int pageSize, String sort, String direction) {
 		checkCastEntityToDto();
-		PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.Direction.fromString(direction), sort);
+		PageRequest pageRequest;
+		if (StringUtils.isEmpty(sort)){
+			pageRequest = PageRequest.of(page, pageSize);
+		}
+		else {
+			pageRequest = PageRequest.of(page, pageSize, Sort.Direction.fromString(direction), sort);
+		}
 
 		Page<ENTITY> result;
 		if (StringUtils.isEmpty(query)){
