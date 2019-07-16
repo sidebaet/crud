@@ -10,6 +10,7 @@ import cz.jirutka.rsql.parser.ast.Node;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -73,6 +74,7 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	}
 
 	@Override
+	@Transactional
 	public ENTITY create(@Validated @NotNull ENTITY entity) {
 		if (entity.getId() != null && crudRepository.existsById(entity.getId())) {
 			throw new EntityAlreadyExistsException("Entity with id : " + entity.getId().toString() + ", already exists");
@@ -85,6 +87,7 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	}
 
 	@Override
+	@Transactional
 	public ENTITY update(@NotNull ID id, @Validated @NotNull ENTITY entityToUpdate) {
 		if (!crudRepository.existsById(id)){
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+id+" not found");
@@ -98,6 +101,7 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	}
 
 	@Override
+	@Transactional
 	public void delete(ID id) {
 		if (!crudRepository.existsById(id)){
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+ id +" not found");
