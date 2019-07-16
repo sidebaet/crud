@@ -12,6 +12,6 @@ public class UserService extends CrudServiceImpl<User, Long> {
 
 	@Autowired
 	public UserService(UserRepository userRepository) {
-		super(User.class, userRepository, new DictionaryService() {}, new ValidationService() {}, new ArrayList<>());
+		super(User.class, userRepository, new DictionaryService() {}, new ValidationService() {}, new ArrayList<>(), new ArrayList<>());
 	}
 }

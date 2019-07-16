@@ -31,18 +31,20 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	private final ValidationService validationService;
 
 	private final List<Command<ENTITY>> updateCommands;
+	private final List<Command<ENTITY>> createCommands;
 
 	public CrudServiceImpl(Class<ENTITY> entityClassType,
-						   CrudRepository<ENTITY,ID> crudRepository,
+						   CrudRepository<ENTITY, ID> crudRepository,
 						   DictionaryService dictionaryService,
 						   ValidationService validationService,
-						   List<Command<ENTITY>> updateCommands
-						   ){
+						   List<Command<ENTITY>> updateCommands,
+						   List<Command<ENTITY>> createCommands){
 		this.entityClassType = entityClassType;
 		this.crudRepository = crudRepository;
 		this.dictionaryService = dictionaryService;
 		this.validationService = validationService;
 		this.updateCommands = updateCommands;
+		this.createCommands = createCommands;
 	}
 
 	@PostConstruct
@@ -73,6 +75,9 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 			throw new EntityAlreadyExistsException("Entity with id : " + entity.getId().toString() + ", already exists");
 		}
 		validationService.validateForCreate(entity);
+		if (!CollectionUtils.isEmpty(createCommands)){
+			createCommands.forEach(entityCommand -> entityCommand.execute(entity));
+		}
 		return crudRepository.save(entity);
 	}
 

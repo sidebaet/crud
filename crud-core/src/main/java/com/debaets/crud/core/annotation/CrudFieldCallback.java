@@ -1,5 +1,6 @@
 package com.debaets.crud.core.annotation;
 
+import com.debaets.crud.core.annotation.command.CrudCreateCommand;
 import com.debaets.crud.core.annotation.command.CrudUpdateCommand;
 import com.debaets.crud.core.repository.CrudRepository;
 import com.debaets.crud.core.service.Command;
@@ -35,15 +36,21 @@ public abstract class CrudFieldCallback {
 
 			Object toRegister;
 			try {
-				var constructor = genericClass.getConstructor(Class.class, CrudRepository.class,
-						DictionaryService.class, ValidationService.class, List.class);
+				var constructor = genericClass.getConstructor(Class.class,
+						CrudRepository.class,
+						DictionaryService.class,
+						ValidationService.class,
+						List.class,
+						List.class
+				);
 				var repositoryBeanName = entityClass.getSimpleName().toLowerCase()+"Repository";
 				toRegister = constructor.newInstance(
 						entityClass,
 						(CrudRepository)configurableBeanFactory.getBean(repositoryBeanName),
 						getDictionaryService(entityClass),
 						getValidationService(entityClass),
-						getUpdateCommands(entityClass)
+						getUpdateCommands(entityClass),
+						getCreateCommands(entityClass)
 						);
 			} catch (Exception e){
 				log.error(ERROR_CREATE_INSTANCE, genericClass.getTypeName(), e);
@@ -81,6 +88,15 @@ public abstract class CrudFieldCallback {
 		var updateCommands = configurableBeanFactory.getBeansWithAnnotation(CrudUpdateCommand.class);
 		return updateCommands.values().stream()
 				.filter(o -> entityClass.equals(o.getClass().getAnnotation(CrudUpdateCommand.class).entity()))
+				.filter(o -> Command.class.isAssignableFrom(o.getClass()))
+				.map(Command.class::cast)
+				.collect(Collectors.toList());
+	}
+
+	private List<Command> getCreateCommands(Class<?> entityClass) {
+		var updateCommands = configurableBeanFactory.getBeansWithAnnotation(CrudCreateCommand.class);
+		return updateCommands.values().stream()
+				.filter(o -> entityClass.equals(o.getClass().getAnnotation(CrudCreateCommand.class).entity()))
 				.filter(o -> Command.class.isAssignableFrom(o.getClass()))
 				.map(Command.class::cast)
 				.collect(Collectors.toList());
