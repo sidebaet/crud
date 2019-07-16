@@ -32,19 +32,22 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 
 	private final List<Command<ENTITY>> updateCommands;
 	private final List<Command<ENTITY>> createCommands;
+	private final List<Command<ENTITY>> deleteCommands;
 
 	public CrudServiceImpl(Class<ENTITY> entityClassType,
 						   CrudRepository<ENTITY, ID> crudRepository,
 						   DictionaryService dictionaryService,
 						   ValidationService validationService,
 						   List<Command<ENTITY>> updateCommands,
-						   List<Command<ENTITY>> createCommands){
+						   List<Command<ENTITY>> createCommands,
+						   List<Command<ENTITY>> deleteCommands){
 		this.entityClassType = entityClassType;
 		this.crudRepository = crudRepository;
 		this.dictionaryService = dictionaryService;
 		this.validationService = validationService;
 		this.updateCommands = updateCommands;
 		this.createCommands = createCommands;
+		this.deleteCommands = deleteCommands;
 	}
 
 	@PostConstruct
@@ -98,6 +101,9 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	public void delete(ID id) {
 		if (!crudRepository.existsById(id)){
 			throw new ResourceNotFoundException("Entity of type "+entityClassType.toString()+" with id : "+ id +" not found");
+		}
+		if (!CollectionUtils.isEmpty(deleteCommands)){
+			deleteCommands.forEach(entityCommand -> entityCommand.execute(crudRepository.findById(id).orElse(null)));
 		}
 		crudRepository.deleteById(id);
 	}

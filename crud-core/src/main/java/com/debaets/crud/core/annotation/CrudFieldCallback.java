@@ -1,6 +1,7 @@
 package com.debaets.crud.core.annotation;
 
 import com.debaets.crud.core.annotation.command.CrudCreateCommand;
+import com.debaets.crud.core.annotation.command.CrudDeleteCommand;
 import com.debaets.crud.core.annotation.command.CrudUpdateCommand;
 import com.debaets.crud.core.repository.CrudRepository;
 import com.debaets.crud.core.service.Command;
@@ -41,6 +42,7 @@ public abstract class CrudFieldCallback {
 						DictionaryService.class,
 						ValidationService.class,
 						List.class,
+						List.class,
 						List.class
 				);
 				var repositoryBeanName = entityClass.getSimpleName().toLowerCase()+"Repository";
@@ -50,7 +52,8 @@ public abstract class CrudFieldCallback {
 						getDictionaryService(entityClass),
 						getValidationService(entityClass),
 						getUpdateCommands(entityClass),
-						getCreateCommands(entityClass)
+						getCreateCommands(entityClass),
+						getDeleteCommands(entityClass)
 						);
 			} catch (Exception e){
 				log.error(ERROR_CREATE_INSTANCE, genericClass.getTypeName(), e);
@@ -97,6 +100,15 @@ public abstract class CrudFieldCallback {
 		var updateCommands = configurableBeanFactory.getBeansWithAnnotation(CrudCreateCommand.class);
 		return updateCommands.values().stream()
 				.filter(o -> entityClass.equals(o.getClass().getAnnotation(CrudCreateCommand.class).entity()))
+				.filter(o -> Command.class.isAssignableFrom(o.getClass()))
+				.map(Command.class::cast)
+				.collect(Collectors.toList());
+	}
+
+	private List<Command> getDeleteCommands(Class<?> entityClass) {
+		var updateCommands = configurableBeanFactory.getBeansWithAnnotation(CrudDeleteCommand.class);
+		return updateCommands.values().stream()
+				.filter(o -> entityClass.equals(o.getClass().getAnnotation(CrudDeleteCommand.class).entity()))
 				.filter(o -> Command.class.isAssignableFrom(o.getClass()))
 				.map(Command.class::cast)
 				.collect(Collectors.toList());
