@@ -9,6 +9,8 @@ import javax.persistence.criteria.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -86,6 +88,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 		Object arg = args.get(0);
 		if (arg instanceof Date) {
 			return builder.between(path.as(Date.class), (Date) arg, (Date) args.get(1));
+		} else if (arg instanceof OffsetDateTime) {
+			return builder.between(path.as(OffsetDateTime.class), (OffsetDateTime) arg, (OffsetDateTime) args.get(1));
 		}
 		return builder.between(path.as(LocalDate.class), (LocalDate) arg, (LocalDate) args.get(1));
 	}
@@ -103,6 +107,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 			return builder.lessThanOrEqualTo(path.as(Date.class), (Date) argument);
 		} else if (argument instanceof LocalDate) {
 			return builder.lessThanOrEqualTo(path.as(LocalDate.class), (LocalDate) argument);
+		} else if (argument instanceof OffsetDateTime) {
+			return builder.lessThanOrEqualTo(path.as(OffsetDateTime.class), (OffsetDateTime) argument);
 		}
 		return builder.lessThanOrEqualTo(
 				path, argument.toString());
@@ -113,6 +119,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 			return builder.lessThan(path.as(Date.class), (Date) argument);
 		} else if (argument instanceof LocalDate) {
 			return builder.lessThan(path.as(LocalDate.class), (LocalDate) argument);
+		} else if (argument instanceof OffsetDateTime) {
+			return builder.lessThan(path.as(OffsetDateTime.class), (OffsetDateTime) argument);
 		}
 		return builder.lessThan(path, argument.toString());
 	}
@@ -122,6 +130,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 			return builder.greaterThanOrEqualTo(path.as(Date.class), (Date) argument);
 		} else if (argument instanceof LocalDate) {
 			return builder.greaterThanOrEqualTo(path.as(LocalDate.class), (LocalDate) argument);
+		} else if (argument instanceof OffsetDateTime) {
+			return builder.greaterThanOrEqualTo(path.as(OffsetDateTime.class), (OffsetDateTime) argument);
 		}
 		return builder.greaterThanOrEqualTo(
 				path, argument.toString());
@@ -132,6 +142,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 			return builder.greaterThan(path.as(Date.class), (Date) argument);
 		} else if (argument instanceof LocalDate) {
 			return builder.greaterThan(path.as(LocalDate.class), (LocalDate) argument);
+		}  else if (argument instanceof OffsetDateTime) {
+			return builder.greaterThan(path.as(OffsetDateTime.class), (OffsetDateTime) argument);
 		}
 		return builder.greaterThan(path, argument.toString());
 	}
@@ -144,6 +156,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 			return builder.notEqual(path.as(Date.class), argument);
 		} else if (argument instanceof LocalDate) {
 			return builder.notEqual(path.as(LocalDate.class), argument);
+		} else if (argument instanceof OffsetDateTime) {
+			return builder.notEqual(path.as(OffsetDateTime.class), argument);
 		} else if (argument == null) {
 			return builder.isNotNull(path);
 		} else {
@@ -167,6 +181,8 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 			return builder.equal(path.as(Date.class), argument);
 		} else if (type.equals(LocalDate.class)) {
 			return builder.equal(path.as(LocalDate.class), argument);
+		} else if (type.equals(OffsetDateTime.class)) {
+			return builder.equal(path.as(OffsetDateTime.class), argument);
 		} else if (type.equals(Boolean.class)) {
 			return builder.equal(path.as(Boolean.class), Boolean.valueOf(argument.toString()));
 		} else {
@@ -192,6 +208,13 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 				}
 			} else if (type.equals(LocalDate.class)) {
 				args.add(LocalDate.parse(argument, formatter));
+			} else if (type.equals(OffsetDateTime.class)) {
+				var date = LocalDate.parse(argument, formatter);
+				args.add(OffsetDateTime.of(
+						date,
+						LocalTime.MIN,
+						OffsetDateTime.now().getOffset()
+				));
 			} else if (type.getEnumConstants() != null && type.getEnumConstants().length > 0) {
 				args.add(Enum.valueOf((Class<? extends Enum>) type, argument));
 			} else {

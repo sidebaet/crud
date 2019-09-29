@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,8 @@ public class User implements CrudEntity<Long> {
 	private Date birthday;
 
 	private LocalDate weddingDate;
+
+	private OffsetDateTime offsetDateTime;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Period> periods;

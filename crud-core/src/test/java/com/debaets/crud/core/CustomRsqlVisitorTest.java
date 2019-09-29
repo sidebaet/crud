@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,6 +76,11 @@ public class CustomRsqlVisitorTest {
 		userJohn.setBirthday(formatter.parse(birthDay_John));
 		userJohn.setWeddingDate(WEDDING_DATE_JOHN);
 		userJohn.setIsAlive(true);
+		userJohn.setOffsetDateTime(OffsetDateTime.of(
+				WEDDING_DATE_JOHN,
+				LocalTime.MIN,
+				OffsetDateTime.now().getOffset()
+		));
 		repository.save(userJohn);
 
 		userTom = new User();
@@ -157,6 +164,26 @@ public class CustomRsqlVisitorTest {
 		assertThat(userTom, not(isIn(results)));
 	}
 
+	@Test
+	public void testEqualityOffsetDateTime_thenCorrect(){
+		Node rootNode = new RSQLParser().parse("offsetDateTime==01/01/1995");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
+	}
+
+	@Test
+	public void testGreaterOrEqualsOffsetDateTime_thenCorrect(){
+		Node rootNode = new RSQLParser().parse("offsetDateTime>=01/01/1995");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
+	}
+
 	//Test >= (date)
 	@Test
 	public void givenBirthdayGE_whenGettingListOfUsers_thenCorrect() {
@@ -194,6 +221,39 @@ public class CustomRsqlVisitorTest {
 
 		assertThat(userTom, isIn(results));
 		assertThat(userJohn, not(isIn(results)));
+	}
+
+	@Test
+	public void testGreaterOffsetDateTime_thenCorrect() {
+
+		Node rootNode = new RSQLParser().parse("offsetDateTime>01/01/1994");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
+	}
+
+	@Test
+	public void testLessOffsetDateTime_thenCorrect() {
+
+		Node rootNode = new RSQLParser().parse("offsetDateTime<01/01/1996");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
+	}
+
+	@Test
+	public void testLessOrEqualsDateTime_thenCorrect() {
+
+		Node rootNode = new RSQLParser().parse("offsetDateTime<=01/01/1995");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
 	}
 
 	//Test < (date)
