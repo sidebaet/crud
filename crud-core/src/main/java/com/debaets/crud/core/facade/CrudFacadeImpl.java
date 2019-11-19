@@ -120,7 +120,7 @@ public class CrudFacadeImpl<DTO, ENTITY extends CrudEntity<ID>, ID extends Seria
 			pageRequest = PageRequest.of(page, pageSize);
 		}
 		else {
-			pageRequest = PageRequest.of(page, pageSize, Sort.Direction.fromString(direction), sort);
+			pageRequest = PageRequest.of(page, pageSize, Sort.Direction.fromString(direction), sort.split(","));
 		}
 
 		Page<ENTITY> result;
