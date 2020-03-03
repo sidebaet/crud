@@ -12,7 +12,9 @@ public enum  RsqlSearchOperation {
 	LESS_THAN_OR_EQUAL(RSQLOperators.LESS_THAN_OR_EQUAL),
 	IN(RSQLOperators.IN),
 	NOT_IN(RSQLOperators.NOT_IN),
-	BETWEEN(Operators.BETWEEN);
+	BETWEEN(Operators.BETWEEN),
+	IS_NULL(Operators.IS_NULL)
+	;
 
 	private ComparisonOperator operator;
 

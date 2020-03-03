@@ -493,4 +493,29 @@ public class CustomRsqlVisitorTest {
 		assertThat(userTom, not(isIn(results)));
 
 	}
+
+	@Test
+	public void testIsNull_field() {
+		userJohn.setBirthday(null);
+		repository.save(userJohn);
+		Node rootNode = new RSQLParser(Operators.getOperators()).parse("birthday=isNull=0");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
+	}
+
+	@Test
+	public void testIsNull_fieldObject() {
+		userJohn.setAddress(null);
+		repository.save(userJohn);
+		Node rootNode = new RSQLParser(Operators.getOperators()).parse("address=isNull=0");
+		Specification<User> spec = rootNode.accept(new CustomRsqlVisitor<>(new DictionaryService() {},false));
+		List<User> results = repository.findAll(spec);
+
+		assertThat(userJohn, isIn(results));
+		assertThat(userTom, not(isIn(results)));
+	}
+
 }

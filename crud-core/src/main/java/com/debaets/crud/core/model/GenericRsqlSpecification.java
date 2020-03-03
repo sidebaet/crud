@@ -14,6 +14,8 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.debaets.crud.core.model.Operators.IS_NULL;
+
 @SuppressWarnings("unchecked")
 public class GenericRsqlSpecification<T> implements Specification<T> {
 	private String property;
@@ -43,8 +45,12 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 	public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 		canJoin = !knownQueries.contains(query);
 		knownQueries.add(query);
-		List<Object> args = castArguments(root);
-		Object argument = args.get(0);
+		List<Object> args = null;
+		Object argument = null;
+		if (this.operator != IS_NULL){
+			args = castArguments(root);
+			argument = args.get(0);
+		}
 		Path<String> path = (Path<String>) getPath(root, property);
 		query.distinct(isDistinct);
 		return getPredicate(builder, args, argument, path);
@@ -71,16 +77,15 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 				return getIn(builder, args, path);
 			case BETWEEN:
 				return getBetween(builder, args, path);
+			case IS_NULL:
+				return getIsNull(builder, args, path);
 		}
 
 		return null;
 	}
 
 	private Predicate getIsNull(CriteriaBuilder builder, Object argument, Path<String> path) {
-		if (argument == null || "true".equalsIgnoreCase(argument.toString())) {
-			return builder.isNull(path);
-		}
-		return builder.isNotNull(path);
+		return builder.isNull(path);
 	}
 
 	private Predicate getBetween(CriteriaBuilder builder, List<Object> args, Path<String> path) {
