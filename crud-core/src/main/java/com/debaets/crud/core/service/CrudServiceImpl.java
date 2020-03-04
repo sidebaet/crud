@@ -7,6 +7,7 @@ import com.debaets.crud.core.model.exception.ResourceNotFoundException;
 import com.debaets.crud.core.repository.CrudRepository;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -145,6 +146,11 @@ public class CrudServiceImpl<ENTITY extends CrudEntity<ID>, ID extends Serializa
 	@Override
 	public List<ENTITY> findAll() {
 		return crudRepository.findAll();
+	}
+
+	@Override
+	public boolean exists(ENTITY entityExample) {
+		return crudRepository.exists(Example.of(entityExample));
 	}
 
 }

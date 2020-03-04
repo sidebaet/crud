@@ -33,4 +33,6 @@ public interface CrudService <ENTITY, ID extends Serializable> {
 	Page <ENTITY> findAll(PageRequest pageRequest);
 
 	List<ENTITY> findAll();
+
+	boolean exists(ENTITY entityExample);
 }
