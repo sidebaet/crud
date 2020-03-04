@@ -240,7 +240,7 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
 		if (path instanceof PluralAttributePath) {
 			var propertyJoin = properties[0];
 			if (canJoin) {
-				var join = root.join(propertyJoin);
+				var join = root.join(propertyJoin, JoinType.LEFT);
 				if (!this.joinMap.containsKey(propertyJoin)) {
 					this.joinMap.put(propertyJoin, join);
 					//root.fetch(propertyJoin);
